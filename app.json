@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "running-app",
-    "slug": "running-app",
+    "name": "ExploRun",
+    "slug": "explorun",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,7 +15,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "http://127.0.0.1:5000": {
+            "NSExceptionAllowsInsecureHTTPLoads": true,
+            "NSRequiresCertificateTransparency": false,
+            "NSIncludesSubdomains": true
+          }
+        }
+      },
+      "bundleIdentifier": "com.alxy24.explorun"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +35,21 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/NotoSans-Medium.ttf"
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "98103655-0949-44a5-a64e-1e1db6faf3f4"
+      }
     }
   }
 }
