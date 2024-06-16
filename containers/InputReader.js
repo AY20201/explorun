@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, ScrollView, TextInput, Pressable, Text } from "react-native";
+import { StyleSheet, View, ScrollView, TextInput, Pressable, Text,  } from "react-native";
 import * as Location from "expo-location";
 import { MapRenderer } from "./MapRenderer";
 import PageSelect from "./PageSelect";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Checkbox from 'expo-checkbox';
 
 const usStateToAbbrev = {
     "Alabama": "AL",
@@ -111,6 +112,27 @@ function RouteInfoBox({ activePath, useKM })
     );
 }
 
+function CheckboxUnit({ avoidRoads, toggleAvoidRoads, avoidTrails, toggleAvoidTrails })
+{
+    //very, very unclean code, but I'm not sure how to fix it
+    return(
+        <View style={{flexDirection: 'row', marginVertical: 8}}>
+            <View style={styles.row}>
+                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={styles.checkboxText}>Avoid trails</Text>
+                </View>
+                <Checkbox style={{margin: 5}} value={avoidTrails} onValueChange={toggleAvoidTrails} color={'rgb(180, 180, 180)'}/>
+            </View>
+            <View style={{...styles.row, marginLeft: 40}}>
+                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={styles.checkboxText}>Avoid roads</Text>
+                </View>
+                <Checkbox style={{margin: 5}} value={avoidRoads} onValueChange={toggleAvoidRoads} color={'rgb(180, 180, 180)'}/>
+            </View>
+        </View>
+    );
+}
+
 const InputReader = ({route, navigation}) => {
     
     const [minDistance, setMinDistance] = useState("");
@@ -133,6 +155,9 @@ const InputReader = ({route, navigation}) => {
 
     const [activePathIndex, setActivePathIndex] = useState(0);
     const [activePathIsFavorite, setActivePathIsFavorite] = useState(false);
+
+    const [avoidRoads, setAvoidRoads] = useState(false);
+    const [avoidTrails, setAvoidTrails] = useState(false);
 
     const [mapRef, setMapRef] = useState(React.createRef());
     //const mapRef = React.createRef();
@@ -189,7 +214,7 @@ const InputReader = ({route, navigation}) => {
     function checkParams(){
         let minDistNum = Number(minDistance)
         let maxDistNum = Number(maxDistance)
-        return minDistNum < 0.0 || maxDistNum < 0.0 || minDistNum >= maxDistNum || minDistance == "" || maxDistance == "";
+        return minDistNum < 0.0 || maxDistNum < 0.0 || minDistNum >= maxDistNum || minDistance == "" || maxDistance == "" || (avoidRoads && avoidTrails);
     }
 
     function addFavorite() {
@@ -240,7 +265,7 @@ const InputReader = ({route, navigation}) => {
             return;
         }
         //https://alxy24.pythonanywhere.com/data
-        fetch(`https://alxy24.pythonanywhere.com/data?dist_min=${Number(minDistance)}&dist_max=${Number(maxDistance)}&loc_lat=${startPos.latitude}&loc_lon=${startPos.longitude}&km=${useKM}&count=${undefined}`, { method: 'get', mode: 'cors' })
+        fetch(`https://alxy24.pythonanywhere.com/data?dist_min=${Number(minDistance)}&dist_max=${Number(maxDistance)}&loc_lat=${startPos.latitude}&loc_lon=${startPos.longitude}&km=${useKM}&count=${undefined}&avoid_roads=${+avoidRoads}&avoid_trails=${+avoidTrails}`, { method: 'get', mode: 'cors' })
         .then(
             res => res.json()
         ).then(
@@ -335,6 +360,7 @@ const InputReader = ({route, navigation}) => {
                     </View>
                     <View style={styles.separator}/>
                     <StyledButton text="GENERATE" onPress={() => GenerateRoutes()} style={{...styles.button, width: '100%'}} pressedStyle={{...styles.button, width: '100%', backgroundColor: 'rgb(61, 45, 142)'}} disabled={loading}/>
+                    <CheckboxUnit avoidRoads={avoidRoads} toggleAvoidRoads={() => setAvoidRoads(!avoidRoads)} avoidTrails={avoidTrails} toggleAvoidTrails={() => setAvoidTrails(!avoidTrails)}/>
                 </View>
             </ScrollView>
             <PageSelect navigator={navigation} homeParams={{}} favoritesParams={{favorites: favoritedRoutes, useKM: useKM}}/>
@@ -422,7 +448,12 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         width: '100%',
         alignSelf: 'stretch',
-    }
+    },
+    checkboxText: {
+        color: 'rgb(200, 200, 200)',
+        fontSize: 15,
+        fontFamily: 'NotoSans-Medium'
+    },
 });
 
 export default InputReader;
