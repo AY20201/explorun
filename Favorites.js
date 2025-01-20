@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ScrollView, Dimensions, Button, FlatList } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Dimensions, Button, FlatList, TextInput } from 'react-native';
 import PageSelect from './containers/PageSelect';
 import { MapDisplay } from "./containers/MapRenderer";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const deviceWidth = Dimensions.get("window").width;
 
-function FavoriteBox({ navigation, route, useKM, removeFavorite, isFavorited }){
+function FavoriteBox({ pathId, navigation, route, useKM, removeFavorite, changeTitle, isFavorited }){
+
+    const [currentTitle, setCurrentTitle] = useState(route.title);
+
     const currentRegion = {
         latitude: route.center[0],
         longitude: route.center[1],
@@ -14,12 +17,18 @@ function FavoriteBox({ navigation, route, useKM, removeFavorite, isFavorited }){
         longitudeDelta: route.bounds
     }
 
+    function changeLocalTitle(newTitle){
+        setCurrentTitle(newTitle); //changing local title forces update
+        changeTitle(pathId, newTitle);
+    }
+
     let dist = Math.round(route.distance * (useKM ? 1.609 : 1.0) * 100.0) / 100.0;
     let elevation_gain = Math.round(route.elevation_gain * (useKM ? 1 : 3.28));
 
     return(
         <View style={styles.routeContainer}>
-            {route.town && (<Text style={styles.headerText}>{route.town}</Text>)}
+            {/* {route.town && (<Text style={styles.headerText}>{route.town}</Text>)} */}
+            {route.town && <TextInput style={styles.headerText} value={currentTitle} onChangeText={newTitle => changeLocalTitle(newTitle)} placeholder={route.town}/>}
             <MapDisplay currentRegion={currentRegion} activePath={route} removeFavorite={removeFavorite} isFavorited={isFavorited} fullScreen={() => navigation.navigate("FullScreenView", { activePath: route, currentPosParam: {} })}/>
             <View style={styles.infoBox}>
                 <Text style={{...styles.infoText, textAlign:'center'}}>Distance: {dist == 0.0 ? "--" : dist} {useKM ? "KM" : "MI"}</Text>
@@ -75,6 +84,12 @@ const Favorites = ({route, navigation}) => {
 
         AsyncStorage.setItem('favoritedRoutes', JSON.stringify(newFavoritedRoutes));
     }
+
+    function SetFavoriteTitle(pathId, newTitle){
+        let newFavoritedRoutes = {...favoritedRoutes, [pathId]: {...favoritedRoutes[pathId], title: newTitle}};
+        setFavoritedRoutes(newFavoritedRoutes);
+        AsyncStorage.setItem('favoritedRoutes', JSON.stringify(newFavoritedRoutes));
+    }
     /*
     return (
         <View style={styles.root}>
@@ -107,7 +122,7 @@ const Favorites = ({route, navigation}) => {
                         data={Object.values(displayFavoritedRoutes)}
                         renderItem={({ item: route }) => {
                             const pathId = route.path.length * Math.round(route.distance * 100);
-                            return(<FavoriteBox key={pathId} navigation={navigation} route={route} useKM={useKM} removeFavorite={() => RemoveFavorite(pathId)} isFavorited={routeInFavorites[pathId]}/>);
+                            return(<FavoriteBox key={pathId} pathId={pathId} navigation={navigation} route={route} useKM={useKM} removeFavorite={() => RemoveFavorite(pathId)} changeTitle={SetFavoriteTitle} isFavorited={routeInFavorites[pathId]}/>);
                         }}
                     />
                     :
@@ -167,6 +182,7 @@ const styles = StyleSheet.create({
         color: 'rgb(110, 110, 110)',
         fontSize: 26,
         fontFamily: 'NotoSans-Medium',
-        marginBottom: 8
+        marginBottom: 8,
+        width: '100%'
     }
 });

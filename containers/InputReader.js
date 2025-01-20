@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, ScrollView, TextInput, Pressable, Text,  } from "react-native";
+import { StyleSheet, View, ScrollView, TextInput, Pressable, Text, ActivityIndicator } from "react-native";
 import * as Location from "expo-location";
 import { MapRenderer } from "./MapRenderer";
 import PageSelect from "./PageSelect";
+import { InfoPanel } from "./InfoPanel";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Checkbox from 'expo-checkbox';
 
@@ -142,6 +143,7 @@ const InputReader = ({route, navigation}) => {
     const [initialRegion, setInitialRegion] = useState(null);
     const [startPos, setStartPos] = useState(null);
     const [useKM, setUseKM] = useState(0);
+    const [infoPanelDisplayed, setInfoPanelDisplayed] = useState(false);
 
     const [activePath, setActivePath] = useState({path: [], elevation: [], elevation_gain: 0, center: [], distance: 0.0, bounds: 0.05});
     const [loadedPaths, setLoadedPaths] = useState({});
@@ -234,7 +236,7 @@ const InputReader = ({route, navigation}) => {
                     data => {
                         let townName = `${data[0]["name"]}, ${data[0].hasOwnProperty("state") && data[0]["country"] == "US" ? usStateToAbbrev[data[0]["state"]] : data[0]["country"]}`;
                         
-                        newFavoritedRoutes = {...favoritedRoutes, [pathId]: {...activePath, town: townName}};
+                        newFavoritedRoutes = {...favoritedRoutes, [pathId]: {...activePath, town: townName, title: townName}};
                         setFavoritedRoutes(newFavoritedRoutes);
                     }
                 );
@@ -337,33 +339,45 @@ const InputReader = ({route, navigation}) => {
     }
 
     return (
-        <View style={styles.root}>
-            <ScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps='handled'>
-                <MapRenderer currentPosition={currentPos} currentRegion={initialRegion} locationCallback={locationCallback} favorite={addFavorite} isFavorited={activePathIsFavorite} activePath={activePath} fullScreen={() => navigation.navigate("FullScreenView", { activePath: activePath, currentPosParam: currentPos })} errorText={errorText} ref={mapRef}/>
-                <View style={styles.inputSection}>
-                    <RouteInfoBox activePath={activePath} useKM={useKM}/>
-                    <InputBox placeholderText={"Minimum Distance"} value={minDistance} setValue={setMinDistance}/>
-                    <InputBox placeholderText={"Maximum Distance"} value={maxDistance} setValue={setMaxDistance}/>
-                    <View style={styles.separator}/>
-                    <View style={styles.row}>
-                        <Pressable onPress={() => setUseKM(1)} style={useKM ? {...styles.button, borderRightWidth: 0.5, backgroundColor: 'rgb(61, 45, 142)'} : {...styles.button, borderRightWidth: 0.5}}>
-                            <Text style={useKM ? {...styles.text, color: 'rgb(255, 255, 255)'} : styles.text}>KM</Text>
-                        </Pressable>
-                        <Pressable onPress={() => setUseKM(0)} style={!useKM ? {...styles.button, borderLeftWidth: 0.5, backgroundColor: 'rgb(61, 45, 142)'} : {...styles.button, borderLeftWidth: 0.5}}>
-                            <Text style={!useKM ? {...styles.text, color: 'rgb(255, 255, 255)'} : styles.text}>MI</Text>
-                        </Pressable>
+        <View style={{flex: 1}}>
+            <View style={styles.root}>
+                <ScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps='handled'>
+                    <MapRenderer currentPosition={currentPos} currentRegion={initialRegion} locationCallback={locationCallback} favorite={addFavorite} isFavorited={activePathIsFavorite} activePath={activePath} displayInfoPanel={() => setInfoPanelDisplayed(true)} fullScreen={() => navigation.navigate("FullScreenView", { activePath: activePath, currentPosParam: currentPos })} errorText={errorText} ref={mapRef}/>
+                    <View style={styles.inputSection}>
+                        <RouteInfoBox activePath={activePath} useKM={useKM}/>
+                        <InputBox placeholderText={"Minimum Distance"} value={minDistance} setValue={setMinDistance}/>
+                        <InputBox placeholderText={"Maximum Distance"} value={maxDistance} setValue={setMaxDistance}/>
+                        <View style={styles.separator}/>
+                        <View style={styles.row}>
+                            <Pressable onPress={() => setUseKM(1)} style={useKM ? {...styles.button, borderRightWidth: 0.5, backgroundColor: 'rgb(61, 45, 142)'} : {...styles.button, borderRightWidth: 0.5}}>
+                                <Text style={useKM ? {...styles.text, color: 'rgb(255, 255, 255)'} : styles.text}>KM</Text>
+                            </Pressable>
+                            <Pressable onPress={() => setUseKM(0)} style={!useKM ? {...styles.button, borderLeftWidth: 0.5, backgroundColor: 'rgb(61, 45, 142)'} : {...styles.button, borderLeftWidth: 0.5}}>
+                                <Text style={!useKM ? {...styles.text, color: 'rgb(255, 255, 255)'} : styles.text}>MI</Text>
+                            </Pressable>
+                        </View>
+                        <View style={styles.separator}/>
+                        <View style={styles.row}>
+                            <StyledButton text="PREV" onPress={() => ScrollRoutes(-1)} style={{...styles.button, borderRightWidth: 0.5}} disabled={routeData.loops !== undefined ? (activePathIndex == 0) : true}/>
+                            <StyledButton text="NEXT" onPress={() => ScrollRoutes(1)} style={{...styles.button, borderLeftWidth: 0.5}} disabled={routeData.loops !== undefined ? (activePathIndex >= routeData.loops.length - 1) : true}/>
+                        </View>
+                        <View style={styles.separator}/>
+                        <StyledButton text="GENERATE" onPress={() => GenerateRoutes()} style={{...styles.button, width: '100%'}} pressedStyle={{...styles.button, width: '100%', backgroundColor: 'rgb(61, 45, 142)'}} disabled={loading}/>
+                        <CheckboxUnit avoidRoads={avoidRoads} toggleAvoidRoads={() => setAvoidRoads(!avoidRoads)} avoidTrails={avoidTrails} toggleAvoidTrails={() => setAvoidTrails(!avoidTrails)}/>
+                        {/* <ActivityIndicator size='large'/> */}
                     </View>
-                    <View style={styles.separator}/>
-                    <View style={styles.row}>
-                        <StyledButton text="PREV" onPress={() => ScrollRoutes(-1)} style={{...styles.button, borderRightWidth: 0.5}} disabled={routeData.loops !== undefined ? (activePathIndex == 0) : true}/>
-                        <StyledButton text="NEXT" onPress={() => ScrollRoutes(1)} style={{...styles.button, borderLeftWidth: 0.5}} disabled={routeData.loops !== undefined ? (activePathIndex >= routeData.loops.length - 1) : true}/>
+                </ScrollView>
+                {loading && 
+                    <View style={styles.loadingOverlay}>
+                        <ActivityIndicator size='large'/>
                     </View>
-                    <View style={styles.separator}/>
-                    <StyledButton text="GENERATE" onPress={() => GenerateRoutes()} style={{...styles.button, width: '100%'}} pressedStyle={{...styles.button, width: '100%', backgroundColor: 'rgb(61, 45, 142)'}} disabled={loading}/>
-                    <CheckboxUnit avoidRoads={avoidRoads} toggleAvoidRoads={() => setAvoidRoads(!avoidRoads)} avoidTrails={avoidTrails} toggleAvoidTrails={() => setAvoidTrails(!avoidTrails)}/>
-                </View>
-            </ScrollView>
-            <PageSelect navigator={navigation} homeParams={{}} favoritesParams={{favorites: favoritedRoutes, useKM: useKM}}/>
+                }
+                <PageSelect navigator={navigation} homeParams={{}} favoritesParams={{favorites: favoritedRoutes, useKM: useKM}}/>
+            </View>
+            
+            {infoPanelDisplayed && 
+                <InfoPanel closePanel={() => setInfoPanelDisplayed(false)}/>
+            }
         </View>
     );
 }
@@ -454,6 +468,15 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontFamily: 'NotoSans-Medium'
     },
+    loadingOverlay: {
+        position: 'absolute',
+        top: 670,
+        height: 60,
+        width: '100%',
+        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Adjust transparency here
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
 });
 
 export default InputReader;

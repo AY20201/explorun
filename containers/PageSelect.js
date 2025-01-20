@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, Button, TouchableOpacity } from 'react-native';
-import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome5, AntDesign } from '@expo/vector-icons';
 
 const PageSelect = ({navigator, homeParams, favoritesParams}) => {
   return (
@@ -11,6 +11,9 @@ const PageSelect = ({navigator, homeParams, favoritesParams}) => {
         <TouchableOpacity style={styles.button} onPress={() => navigator.navigate("Favorites", favoritesParams)}>
             <MaterialIcons name="favorite" size={35} color="gray"/>
         </TouchableOpacity>
+        {/* <TouchableOpacity style={styles.button} onPress={() => navigator.navigate("Info")}>
+            <AntDesign name="infocirlceo" size={33} color="gray"/>
+        </TouchableOpacity> */}
     </View>
   );
 };
@@ -29,6 +32,7 @@ const styles = StyleSheet.create({
     },
     button: {
         marginBottom: 20,
-        alignItems: "center"
+        alignItems: "center",
+        width: 150
     }
 })

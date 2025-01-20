@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { StyleSheet, View, Dimensions, TouchableOpacity, Pressable, Text, Image } from "react-native";
 import MapView, { Marker, Polyline } from 'react-native-maps';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { LocationMarker } from "./LocationMarker";
 
 const deviceWidth = Dimensions.get("window").width;
 
@@ -32,6 +33,7 @@ export function GetPathColor(activePathElevation) {
 //MapRenderer has the marker, MapDisplay does not
 export const MapRenderer = React.forwardRef((props, ref) => {
     const [marker, setMarker] = useState(null);
+    const [markerLayer, setMarkerLayer] = useState(50);
 
     function onMapPress(event, callback)
     {
@@ -43,10 +45,11 @@ export const MapRenderer = React.forwardRef((props, ref) => {
     const pathExists = props.activePath.path.length !== 0;
 
     return(
-        <View style={{height: 450}}>
+        <View style={{height: 410}}>
             {props.currentRegion && (
                 <MapView style={styles.map} region={props.currentRegion} onPress={(e) => onMapPress(e, props.locationCallback)} ref={ref}>
-                    <Marker coordinate={marker === null ? props.currentPosition : marker} title="Start and end point">
+                    {/* <LocationMarker/> */}
+                    <Marker coordinate={marker === null ? props.currentPosition : marker}>
                         <Image source={require("./../assets/marker_icon.png")} style={{width: 50, height: 50, marginBottom: 40}}/>
                     </Marker>
                     <Polyline coordinates={props.activePath.path} strokeWidth={4} strokeColors={pathColors} lineJoin="bevel"/>
@@ -62,6 +65,9 @@ export const MapRenderer = React.forwardRef((props, ref) => {
             </Pressable>
             <TouchableOpacity style={styles.overlayButtonLeft} onPress={props.fullScreen}>
                 <MaterialIcons name="fullscreen" size={40} color={"gray"}/>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.overlayButtonLeftTop} onPress={props.displayInfoPanel}>
+                <AntDesign name="infocirlceo" size={35} color="gray"/>
             </TouchableOpacity>
         </View>
     );
@@ -140,6 +146,19 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         marginTop: -50,
         bottom: 5,
+        left: 5,
+    },
+    overlayButtonLeftTop: {
+        position: 'relative',
+        backgroundColor: 'rgba(250, 250, 250, 0.95)',
+        alignSelf: 'flex-start',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 50,
+        height: 50,
+        borderRadius: 15,
+        marginTop: -50,
+        bottom: 60,
         left: 5,
     },
     errorText: {

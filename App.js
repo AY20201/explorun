@@ -6,6 +6,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import InputReader from './containers/InputReader';
 import Favorites from './Favorites';
 import FullScreenView from './FullScreenView'
+import Info from './Info'
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 
@@ -24,7 +25,8 @@ export default function App() {
             try {
                 SplashScreen.preventAutoHideAsync();
                 await Font.loadAsync({
-                    'NotoSans-Medium': require('./assets/fonts/NotoSans-Medium.ttf')
+                    'NotoSans-Medium': require('./assets/fonts/NotoSans-Medium.ttf'),
+                    'NotoSans-Italic': require('./assets/fonts/NotoSans-MediumItalic.ttf')
                 });
                 //await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (e) {
@@ -65,6 +67,11 @@ export default function App() {
                 <Stack.Screen
                     name="FullScreenView"
                     component={FullScreenView}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="Info"
+                    component={Info}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>

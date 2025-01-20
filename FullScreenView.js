@@ -3,6 +3,7 @@ import { StyleSheet, View, Dimensions, TouchableOpacity, Pressable, Text, Image 
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { MaterialIcons, FontAwesome6 } from '@expo/vector-icons';
 import { GetPathColor } from "./containers/MapRenderer";
+import { LocationMarker } from "./containers/LocationMarker";
 import * as Location from "expo-location";
 
 const deviceWidth = Dimensions.get("window").width;
@@ -42,7 +43,6 @@ const FullScreenView = ({ route, navigation }) => {
         //let location = {coords: {latitude: 42.37616964888291, longitude: -71.33434055672049}};
         //let location = {coords: {latitude: 42.41861941449529, longitude: -71.05038528547605}};
         setCurrentPos(location.coords);
-        //console.log(location);
         //console.log(headingRef.current.trueHeading);
 
         if(isTrackingPosRef.current){
@@ -94,12 +94,14 @@ const FullScreenView = ({ route, navigation }) => {
             {currentRegion && (
                 <MapView style={styles.map} region={currentRegion} ref={mapRef}>
                     <Polyline coordinates={activePath.path} strokeWidth={4} strokeColors={pathColors} lineJoin="bevel"/>
-                    {currentPos && (
-                        <Marker coordinate={currentPos} title="Current Position">
+                    
+                    {/* {currentPos && (
+                        <Marker coordinate={currentPos} anchor={{ x: 0.5, y: 0.5 }} calloutAnchor={{ x: 0.5, y: 0.5 }} title="Current Position">
                             <View style={styles.markerBackground}>
                                 <Image source={require("./assets/runner_icon.png")} style={{
                                     width: 40, 
                                     height: 40,
+                                    //marker snaps to top left when being rotated
                                     transform: [
                                         {
                                           rotate: !headingRef.current.trueHeading
@@ -110,7 +112,8 @@ const FullScreenView = ({ route, navigation }) => {
                                 }}/>
                             </View>
                         </Marker>
-                    )}
+                    )} */}
+                    <LocationMarker/>
                 </MapView>
             )}
             <TouchableOpacity style={styles.overlayButton} onPress={() => navigation.goBack()}>
@@ -182,3 +185,6 @@ const styles = StyleSheet.create({
         borderRadius: '50%'
     }
 });
+
+//{"accuracy": 12.858272586037703, "altitude": 57.8015022277832, "altitudeAccuracy": 13.529930114746094, "heading": -1, "latitude": 42.37578729169782, "longitude": -71.33399448777985, "speed": -1}
+//{"accuracy": 7.004990909943453, "altitude": 48.54764938354492, "altitudeAccuracy": 12, "heading": 51.328125, "latitude": 42.37587568819744, "longitude": -71.33403145714787, "speed": 1.440000057220459}
