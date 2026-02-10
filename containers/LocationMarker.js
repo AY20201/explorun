@@ -40,8 +40,8 @@ export const LocationMarker = () => {
         //let location = {coords: {latitude: 42.41861941449529, longitude: -71.05038528547605}};
         setCurrentPos(location.coords);
         //console.log(headingRef.current.trueHeading);
-        /*
-        if(isTrackingPosRef.current){
+        
+        if(isTrackingPos){
             mapRef.current.animateToRegion({
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
@@ -49,7 +49,6 @@ export const LocationMarker = () => {
                 longitudeDelta: 0.005,
             });
         }
-        */
     };
 
     useEffect(() => {
@@ -61,23 +60,23 @@ export const LocationMarker = () => {
         
         return () => clearInterval(interval);
     }, []);
-
+    
     return(
         <View>
             {currentPos && (
                 <Marker coordinate={currentPos} anchor={{ x: 0.5, y: 0.5 }} calloutAnchor={{ x: 0.5, y: 0.5 }}>
-                    <View style={{...styles.markerBackground, width: 50, height: 50}}>
+                    <View style={styles.markerBackground}>
                         <Image source={require("./../assets/runner_icon.png")} style={{
-                            width: 40,
-                            height: 40,
+                            width: 39,
+                            height: 39,
                             //marker snaps to top left when being rotated
-                            transform: [
-                                {
-                                rotate: !headingRef.current.trueHeading
-                                    ? "0deg"
-                                    : `${headingRef.current.trueHeading - 90}deg`,
-                                },
-                            ],
+                            // transform: [
+                            //      {
+                            //      rotate: !headingRef.current.trueHeading
+                            //          ? "0deg"
+                            //          : `${headingRef.current.trueHeading - 90}deg`,
+                            //      },
+                            // ],
                         }}/>
                     </View>
                 </Marker>
@@ -88,11 +87,11 @@ export const LocationMarker = () => {
 
 const styles = StyleSheet.create({
     markerBackground: {
-        width: 50,
-        height: 50,
+        width: 48,
+        height: 48,
         backgroundColor: 'rgba(255, 255, 255, 0.75)', 
         alignItems: 'center', 
         justifyContent: 'center',
-        borderRadius: '50%',
+        borderRadius: 24,
     }
 });

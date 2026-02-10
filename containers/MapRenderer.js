@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { StyleSheet, View, Dimensions, TouchableOpacity, Pressable, Text, Image } from "react-native";
+import { StyleSheet, View, Dimensions, TouchableOpacity, Pressable, Text, Image, Linking } from "react-native";
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import { LocationMarker } from "./LocationMarker";
 
 const deviceWidth = Dimensions.get("window").width;
+const deviceHeight = Dimensions.get("window").height;
 
 export function GetPathColor(activePathElevation) {
     let red = [255, 0, 149];
@@ -43,12 +44,11 @@ export const MapRenderer = React.forwardRef((props, ref) => {
 
     const pathColors = useMemo(() => GetPathColor(props.activePath.elevation), [props.activePath.elevation]);
     const pathExists = props.activePath.path.length !== 0;
-
     return(
-        <View style={{height: 410}}>
-            {props.currentRegion && (
+        //410 for iPhone 15 display
+        <View style={{height: deviceHeight - 442}}>
+            {((props.locationAllowed && props.currentRegion) || !props.locationAllowed) && (
                 <MapView style={styles.map} region={props.currentRegion} onPress={(e) => onMapPress(e, props.locationCallback)} ref={ref}>
-                    {/* <LocationMarker/> */}
                     <Marker coordinate={marker === null ? props.currentPosition : marker}>
                         <Image source={require("./../assets/marker_icon.png")} style={{width: 50, height: 50, marginBottom: 40}}/>
                     </Marker>
@@ -69,6 +69,9 @@ export const MapRenderer = React.forwardRef((props, ref) => {
             <TouchableOpacity style={styles.overlayButtonLeftTop} onPress={props.displayInfoPanel}>
                 <AntDesign name="infocirlceo" size={35} color="gray"/>
             </TouchableOpacity>
+            <Text style={styles.creditText} onPress={() => {Linking.openURL('https://www.openstreetmap.org/')}}>
+                ©OpenStreetMap contributors
+            </Text>
         </View>
     );
 });
@@ -169,5 +172,14 @@ const styles = StyleSheet.create({
         fontSize: 15,
         marginTop: -21,
         bottom: 5,
+    },
+    creditText: {
+        position: 'relative',
+        fontFamily: 'NotoSans-Medium',
+        color: 'rgb(150, 150, 150)',
+        fontSize: 9,
+        marginTop: -14,
+        bottom: 4,
+        left: deviceWidth - 192
     }
 });

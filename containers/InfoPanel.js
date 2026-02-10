@@ -13,15 +13,15 @@ export const InfoPanel = ({closePanel}) => {
                     <AntDesign name="close" size={35} color="gray"/>
                 </TouchableOpacity>
                 <ScrollView style={{flex: 1, marginTop: 5}}>
-                    <Text style={styles.header}>Welcome to Run Mapper!</Text>
+                    <Text style={styles.header}>Welcome to Explorun!</Text>
                     <Text style={styles.paragraph}>
-                        Use Run Mapper to generate running, walking, or biking routes wherever you are.
+                        Use Explorun to generate running, walking, or biking routes wherever you are.
                         Simply move the red marker to set your starting point, edit your distance range with
                         either kilometers or miles, and press "generate" to create a list of new routes to explore.
                     </Text>
                     <Image source={require('./../assets/route_preview.jpg')} style={{...styles.image, aspectRatio: 1179 / 1630}}/>
                     {/* image res 1179 * 1630*/}
-                    <Text style={styles.caption}>10 mile route generated with Run Mapper</Text>
+                    <Text style={styles.caption}>10 mile route generated with Explorun</Text>
                     <Text style={styles.paragraph}>
                         Press the "heart" icon on the map to set a route as a favorite. These routes can be viewed in the favorites
                         tab, accessible through the heart icon at the bottom of your screen. To change a route's name, select its title
@@ -36,6 +36,8 @@ export const InfoPanel = ({closePanel}) => {
                         To "lock in" on this position for easier, on-the-go navigation, press the "current position" icon
                         in the bottom left corner.
                     </Text>
+                    <Image source={require('./../assets/fullscreen.jpg')} style={{...styles.image, aspectRatio: 1179 / 1189}}/>
+                    <Text style={styles.caption}>fullscreen view</Text>
                 </ScrollView>
             </View>
         </View>
@@ -78,10 +80,10 @@ const styles = StyleSheet.create({
     header: {
         fontSize: 22,
         marginTop: 0,
-        marginHorizontal: 20,
+        marginHorizontal: 33,
         color: 'rgb(90, 90, 90)',
         fontFamily: 'NotoSans-Medium',
-        textAlign: 'center'
+        textAlign: 'left'
     },
     closeButton: {
         backgroundColor: 'rgba(240, 240, 240)',

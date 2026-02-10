@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, ScrollView, TextInput, Pressable, Text, ActivityIndicator } from "react-native";
+import { StyleSheet, View, ScrollView, TextInput, Pressable, Text, ActivityIndicator, Dimensions } from "react-native";
 import * as Location from "expo-location";
 import { MapRenderer } from "./MapRenderer";
 import PageSelect from "./PageSelect";
 import { InfoPanel } from "./InfoPanel";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Checkbox from 'expo-checkbox';
+
+const deviceHeight = Dimensions.get("window").height;
 
 const usStateToAbbrev = {
     "Alabama": "AL",
@@ -141,6 +143,7 @@ const InputReader = ({route, navigation}) => {
 
     const [currentPos, setCurrentPos] = useState(null);
     const [initialRegion, setInitialRegion] = useState(null);
+    const [locationAllowed, setLocationAllowed] = useState(true);
     const [startPos, setStartPos] = useState(null);
     const [useKM, setUseKM] = useState(0);
     const [infoPanelDisplayed, setInfoPanelDisplayed] = useState(false);
@@ -168,6 +171,7 @@ const InputReader = ({route, navigation}) => {
         const getLocation = async() => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if(status !== "granted"){
+                setLocationAllowed(false);
                 console.log("Permission to access location was denied");
                 return;
             }
@@ -229,7 +233,7 @@ const InputReader = ({route, navigation}) => {
                 setActivePathIsFavorite(false);
             } else {
                 const geoCodingApiKey = "f3a727dd9d7bf44f73ebb4962a56ff4a";
-                fetch(`http://api.openweathermap.org/geo/1.0/reverse?lat=${activePath.path[0].latitude}&lon=${activePath.path[0].longitude}&limit=1&appid=${geoCodingApiKey}`, { method: 'get', mode: 'cors' })
+                fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${activePath.path[0].latitude}&lon=${activePath.path[0].longitude}&limit=1&appid=${geoCodingApiKey}`, { method: 'get', mode: 'cors' })
                 .then(
                     res => res.json()
                 ).then(
@@ -238,13 +242,12 @@ const InputReader = ({route, navigation}) => {
                         
                         newFavoritedRoutes = {...favoritedRoutes, [pathId]: {...activePath, town: townName, title: townName}};
                         setFavoritedRoutes(newFavoritedRoutes);
+                        AsyncStorage.setItem('favoritedRoutes', JSON.stringify(newFavoritedRoutes));
                     }
                 );
 
                 setActivePathIsFavorite(true);
             }
-
-            AsyncStorage.setItem('favoritedRoutes', JSON.stringify(newFavoritedRoutes));
         }
     }
     
@@ -342,18 +345,18 @@ const InputReader = ({route, navigation}) => {
         <View style={{flex: 1}}>
             <View style={styles.root}>
                 <ScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps='handled'>
-                    <MapRenderer currentPosition={currentPos} currentRegion={initialRegion} locationCallback={locationCallback} favorite={addFavorite} isFavorited={activePathIsFavorite} activePath={activePath} displayInfoPanel={() => setInfoPanelDisplayed(true)} fullScreen={() => navigation.navigate("FullScreenView", { activePath: activePath, currentPosParam: currentPos })} errorText={errorText} ref={mapRef}/>
+                    <MapRenderer currentPosition={currentPos} currentRegion={initialRegion} locationAllowed={locationAllowed} locationCallback={locationCallback} favorite={addFavorite} isFavorited={activePathIsFavorite} activePath={activePath} displayInfoPanel={() => setInfoPanelDisplayed(true)} fullScreen={() => navigation.navigate("FullScreenView", { activePath: activePath, currentPosParam: currentPos })} errorText={errorText} ref={mapRef}/>
                     <View style={styles.inputSection}>
                         <RouteInfoBox activePath={activePath} useKM={useKM}/>
                         <InputBox placeholderText={"Minimum Distance"} value={minDistance} setValue={setMinDistance}/>
                         <InputBox placeholderText={"Maximum Distance"} value={maxDistance} setValue={setMaxDistance}/>
                         <View style={styles.separator}/>
                         <View style={styles.row}>
-                            <Pressable onPress={() => setUseKM(1)} style={useKM ? {...styles.button, borderRightWidth: 0.5, backgroundColor: 'rgb(61, 45, 142)'} : {...styles.button, borderRightWidth: 0.5}}>
-                                <Text style={useKM ? {...styles.text, color: 'rgb(255, 255, 255)'} : styles.text}>KM</Text>
-                            </Pressable>
                             <Pressable onPress={() => setUseKM(0)} style={!useKM ? {...styles.button, borderLeftWidth: 0.5, backgroundColor: 'rgb(61, 45, 142)'} : {...styles.button, borderLeftWidth: 0.5}}>
                                 <Text style={!useKM ? {...styles.text, color: 'rgb(255, 255, 255)'} : styles.text}>MI</Text>
+                            </Pressable>
+                            <Pressable onPress={() => setUseKM(1)} style={useKM ? {...styles.button, borderRightWidth: 0.5, backgroundColor: 'rgb(61, 45, 142)'} : {...styles.button, borderRightWidth: 0.5}}>
+                                <Text style={useKM ? {...styles.text, color: 'rgb(255, 255, 255)'} : styles.text}>KM</Text>
                             </Pressable>
                         </View>
                         <View style={styles.separator}/>
@@ -366,12 +369,12 @@ const InputReader = ({route, navigation}) => {
                         <CheckboxUnit avoidRoads={avoidRoads} toggleAvoidRoads={() => setAvoidRoads(!avoidRoads)} avoidTrails={avoidTrails} toggleAvoidTrails={() => setAvoidTrails(!avoidTrails)}/>
                         {/* <ActivityIndicator size='large'/> */}
                     </View>
+                    {loading && 
+                        <View style={styles.loadingOverlay}>
+                            <ActivityIndicator size='large'/>
+                        </View>
+                    }
                 </ScrollView>
-                {loading && 
-                    <View style={styles.loadingOverlay}>
-                        <ActivityIndicator size='large'/>
-                    </View>
-                }
                 <PageSelect navigator={navigation} homeParams={{}} favoritesParams={{favorites: favoritedRoutes, useKM: useKM}}/>
             </View>
             
@@ -470,7 +473,7 @@ const styles = StyleSheet.create({
     },
     loadingOverlay: {
         position: 'absolute',
-        top: 670,
+        top: deviceHeight - 182, //670 for iPhone 15
         height: 60,
         width: '100%',
         backgroundColor: 'rgba(255, 255, 255, 0.5)', // Adjust transparency here

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ScrollView, Dimensions, Button, FlatList, TextInput } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Dimensions, Button, FlatList, TextInput, Image, Linking } from 'react-native';
 import PageSelect from './containers/PageSelect';
 import { MapDisplay } from "./containers/MapRenderer";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -118,13 +118,21 @@ const Favorites = ({route, navigation}) => {
             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 50}}>
                 {Object.values(displayFavoritedRoutes).length > 0 
                     ?
-                    <FlatList 
-                        data={Object.values(displayFavoritedRoutes)}
-                        renderItem={({ item: route }) => {
-                            const pathId = route.path.length * Math.round(route.distance * 100);
-                            return(<FavoriteBox key={pathId} pathId={pathId} navigation={navigation} route={route} useKM={useKM} removeFavorite={() => RemoveFavorite(pathId)} changeTitle={SetFavoriteTitle} isFavorited={routeInFavorites[pathId]}/>);
-                        }}
-                    />
+                    <View>
+                        <FlatList 
+                            data={Object.values(displayFavoritedRoutes)}
+                            renderItem={({ item: route }) => {
+                                const pathId = route.path.length * Math.round(route.distance * 100);
+                                return(<FavoriteBox key={pathId} pathId={pathId} navigation={navigation} route={route} useKM={useKM} removeFavorite={() => RemoveFavorite(pathId)} changeTitle={SetFavoriteTitle} isFavorited={routeInFavorites[pathId]}/>);
+                            }}
+                            ListFooterComponent={
+                                <View style={{flexDirection:'row', justifyContent:'space-evenly', justifyContent: 'center', marginBottom: 10}}>
+                                    <Text style={styles.creditText} onPress={() => {Linking.openURL('https://openweathermap.org/')}}>Geolocation provided by OpenWeather</Text>
+                                    <Image source={require("./assets/OpenWeather-Master-Logo-RGB.png")} style={styles.creditImage}/>
+                                </View>
+                            }
+                        />
+                    </View>
                     :
                     <Text style={styles.centerText}>No Favorites Yet!</Text>
                 }
@@ -184,5 +192,17 @@ const styles = StyleSheet.create({
         fontFamily: 'NotoSans-Medium',
         marginBottom: 8,
         width: '100%'
+    },
+    creditText: {
+        marginTop: 6,
+        marginBottom: 15,
+        color: 'rgb(215, 215, 215)',
+        fontSize: 12,
+        fontFamily: 'NotoSans-Medium'
+    },
+    creditImage: {
+        tintColor: 'rgb(200, 200, 200)',
+        width: 60,
+        height: 35,
     }
 });

@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "ExploRun",
+    "name": "Explorun",
     "slug": "explorun",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/runner_app_icon.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/runner_splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,7 +24,14 @@
             "NSRequiresCertificateTransparency": false,
             "NSIncludesSubdomains": true
           }
-        }
+        },
+        "UIBackgroundModes": [
+          "location",
+          "fetch",
+          "remote-notification"
+        ],
+        "NSLocationWhenInUseUsageDescription": "This app requests access to your location for on-the-go navigation and route generation in your nearby area.",
+        "NSLocationAlwaysUsageDescription": "This app requests access to your location for on-the-go navigation and route generation in your nearby area."
       },
       "bundleIdentifier": "com.alxy24.explorun"
     },
@@ -31,7 +39,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.alxy24.explorun"
     },
     "web": {
       "favicon": "./assets/favicon.png"

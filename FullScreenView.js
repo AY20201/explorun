@@ -3,7 +3,7 @@ import { StyleSheet, View, Dimensions, TouchableOpacity, Pressable, Text, Image 
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { MaterialIcons, FontAwesome6 } from '@expo/vector-icons';
 import { GetPathColor } from "./containers/MapRenderer";
-import { LocationMarker } from "./containers/LocationMarker";
+//import { LocationMarker } from "./containers/LocationMarker";
 import * as Location from "expo-location";
 
 const deviceWidth = Dimensions.get("window").width;
@@ -32,7 +32,7 @@ const FullScreenView = ({ route, navigation }) => {
 
         return () => headingWatcher.remove();
     }
-
+    
     const GetLocation = async() => {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if(status !== "granted"){
@@ -54,7 +54,7 @@ const FullScreenView = ({ route, navigation }) => {
             });
         }
     };
-
+    
     useEffect(() => {
         if(route.params != undefined)
         {
@@ -95,25 +95,25 @@ const FullScreenView = ({ route, navigation }) => {
                 <MapView style={styles.map} region={currentRegion} ref={mapRef}>
                     <Polyline coordinates={activePath.path} strokeWidth={4} strokeColors={pathColors} lineJoin="bevel"/>
                     
-                    {/* {currentPos && (
+                    {currentPos && (
                         <Marker coordinate={currentPos} anchor={{ x: 0.5, y: 0.5 }} calloutAnchor={{ x: 0.5, y: 0.5 }} title="Current Position">
                             <View style={styles.markerBackground}>
                                 <Image source={require("./assets/runner_icon.png")} style={{
-                                    width: 40, 
-                                    height: 40,
+                                    width: 38, 
+                                    height: 38,
                                     //marker snaps to top left when being rotated
-                                    transform: [
-                                        {
-                                          rotate: !headingRef.current.trueHeading
-                                            ? "0deg"
-                                            : `${headingRef.current.trueHeading - 90}deg`,
-                                        },
-                                    ],
+                                    // transform: [
+                                    //     {
+                                    //       rotate: !headingRef.current.trueHeading
+                                    //         ? "0deg"
+                                    //         : `${headingRef.current.trueHeading - 90}deg`,
+                                    //     },
+                                    // ],
                                 }}/>
                             </View>
                         </Marker>
-                    )} */}
-                    <LocationMarker/>
+                    )}
+                    {/* <LocationMarker/> */}
                 </MapView>
             )}
             <TouchableOpacity style={styles.overlayButton} onPress={() => navigation.goBack()}>
@@ -177,12 +177,12 @@ const styles = StyleSheet.create({
         left: 10,
     },
     markerBackground: {
-        width: 50,
-        height: 50,
+        width: 48,
+        height: 48,
         backgroundColor: 'rgba(255, 255, 255, 0.75)', 
         alignItems: 'center', 
         justifyContent: 'center',
-        borderRadius: '50%'
+        borderRadius: 24
     }
 });
 
